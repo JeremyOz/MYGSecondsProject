@@ -13,6 +13,9 @@ public class ControllerWordToFind : MonoBehaviour
     public string actualWord = "";
     public TextMeshProUGUI textMeshProWordToFind;
 
+    [SerializeField]
+    private GameObject prefabParticleSystem;
+
     // Au démarrage de la partie.
     // @param Le mot à trouver sur cette partie.
     /* @desc 
@@ -32,8 +35,9 @@ public class ControllerWordToFind : MonoBehaviour
     // Lorsque le joueur valide la saisie (clique sur un bouton).
     // @param La lettre que le joueur a saisie.
     /* @desc
-     * Compare la saisie avec le mot recherché lettre par lettre pour retrouver des correspondances et remplacer
-     * les caractères "_" par la saisie lorsque ça correspond. */
+     * Compare la saisie avec le mot recherché lettre par lettre pour retrouver des correspondances et 
+     * remplacer les caractères "_" par la saisie lorsque ça correspond. 
+     */
     // @return -true- si la lettre est présent dans le mot à rechercher. Sinon -false-.
     public bool OnSearchLetterInWord(char letter)
     {
@@ -42,15 +46,26 @@ public class ControllerWordToFind : MonoBehaviour
         for (int i = 0; i < wordToFind.Length; i++)
         {
             // Compare caractère par caractère avec la saisie en ignorant les accents et les majuscules/minuscules.
-            if(string.Compare(wordToFind[i].ToString(), letter.ToString(), CultureInfo.CurrentCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) == 0)
+            if(string.Compare(wordToFind[i].ToString(), letter.ToString(), CultureInfo.CurrentCulture, 
+                CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) == 0)
             {
                 letterFind = true;
-                Debug.Log("letterFind if " + letterFind);
 
                 actualWord = actualWord.Remove(i, 1);
                 actualWord = actualWord.Insert(i, wordToFind[i].ToString());
 
                 textMeshProWordToFind.text = actualWord;
+
+                Vector3 bottomLeft = textMeshProWordToFind.textInfo.characterInfo[i].bottomLeft;
+                Vector3 topRight = textMeshProWordToFind.textInfo.characterInfo[i].topRight;
+
+                float centerX = Mathf.Lerp(bottomLeft.x, topRight.x, .5f);
+                
+                Vector3 localCenter = new Vector3(centerX, 5.6f, bottomLeft.z);
+
+                Vector3 worldCenter = textMeshProWordToFind.transform.TransformPoint(localCenter);
+
+                Instantiate(prefabParticleSystem, new Vector3(worldCenter.x, worldCenter.y, worldCenter.z), Quaternion.Euler(90, 0, 0));
 
                 CheckWordFound();
             }
@@ -64,7 +79,7 @@ public class ControllerWordToFind : MonoBehaviour
     {
         if (wordToFind == actualWord)
         {
-            PenduGameManager.instance.EndGame();
+            PenduGameManager.instance.EndGame(true);
         }
     }
 

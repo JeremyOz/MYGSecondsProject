@@ -7,14 +7,14 @@ using System.Text.RegularExpressions;
 public class ControllerInputField : MonoBehaviour
 {
     [SerializeField]
+    private UIControllerLetterTried controllerLetterTried;
+    [SerializeField]
     private ControllerWordToFind controllerWordToFind;
     [SerializeField]
     private ControllerSpritePendu controllerSpritePendu;
 
     [SerializeField]
     private TMP_InputField inputField;
-    [SerializeField]
-    private TextMeshProUGUI letterTried;
 
     [SerializeField]
     private TextMeshProUGUI textMeshProErrorInputField;
@@ -32,7 +32,10 @@ public class ControllerInputField : MonoBehaviour
     }
 
     // @param Le champ de texte à vérifier.
-    /* @desc Vérifie que l'InputField ne contient pas plus d'un caractère et garde uniquement le dernier si c'est le cas.*/
+    /* @desc 
+     * Vérifie que l'InputField ne contient pas plus d'un caractère et garde uniquement le dernier 
+     * si c'est le cas.
+     */
     void TestLongueurInput(string input)
     {
         if (input.Length > 1)
@@ -42,7 +45,10 @@ public class ControllerInputField : MonoBehaviour
     }
 
     // @param Le champ de texte à vérifier.
-    /* @desc Vérifie que l'InputField ne contient que des caractères autorisées par la jeu [A-Z]. Sinon l'efface.*/
+    /* @desc 
+     * Vérifie que l'InputField ne contient que des caractères autorisées par la jeu [A-Z]. 
+     * Sinon l'efface.
+     */
     void TestRegexInput(string input)
     {
         if (!Regex.IsMatch(input, regexCharacterOnly))
@@ -54,36 +60,48 @@ public class ControllerInputField : MonoBehaviour
     // @desc Lorsque le joueur appui sur le bouton pour valider la saisie et vérifier la lettre.
     public void OnClickValiderButton()
     {
-        if (inputField.text != "" && !letterTried.text.Contains(inputField.text))
+        if (inputField.text != "")
         {
-            AddLetterInLetterTried();
+            if(!controllerLetterTried.CheckIsLetterTried(inputField.text))
+            {
+                controllerLetterTried.AddLetterInLetterTried(inputField.text);
+
+                // Récupère l'information de si la lettre est bien présente dans le mot.
+                bool letterFind = controllerWordToFind.OnSearchLetterInWord(inputField.text[0]);
+
+                controllerSpritePendu.WrongLetter(letterFind);
+
+                inputField.text = "";
+            }
+            else
+            {
+                coroutineLettreDejaEssaye = StartCoroutine(AffichageLettreDejaEssaye());
+            }
+        }
+    }
+
+    public void OnClickValiderButtonVirtualKeyboard(string value)
+    {
+        if (!controllerLetterTried.CheckIsLetterTried(value))
+        {
+            controllerLetterTried.AddLetterInLetterTried(value);
 
             // Récupère l'information de si la lettre est bien présente dans le mot.
-            bool letterFind = controllerWordToFind.OnSearchLetterInWord(inputField.text[0]);
+            bool letterFind = controllerWordToFind.OnSearchLetterInWord(value[0]);
 
-            if (!letterFind)
-            {
-                controllerSpritePendu.WrongLetter();
-            }
-
-            inputField.text = "";
+            controllerSpritePendu.WrongLetter(letterFind);
         }
-        else if(letterTried.text.Contains(inputField.text))
+        else
         {
             coroutineLettreDejaEssaye = StartCoroutine(AffichageLettreDejaEssaye());
         }
     }
 
-    /* @desc Affiche la lettre essayé par et pour le joueur.*/
-    private void AddLetterInLetterTried()
-    {
-        if (letterTried.text != "")
-            letterTried.text = letterTried.text + " | " + inputField.text;
-        else
-            letterTried.text = inputField.text;
-    }
 
-    /* @desc Affiche pendant deux secondes un message indiquant que la lettre saisie par la joueur l'a déjà été.*/
+    /* @desc 
+     * Affiche pendant deux secondes un message indiquant que la lettre saisie par la joueur l'a 
+     * déjà été.
+     */
     public IEnumerator AffichageLettreDejaEssaye()
     {
         textMeshProErrorInputField.text = "Vous avez déjà essayé cette lettre !";
@@ -94,7 +112,6 @@ public class ControllerInputField : MonoBehaviour
     // Au lancement d'une nouvelle partie.
     public void Reset()
     {
-        letterTried.text = "";
         inputField.text = "";
 
         if(coroutineLettreDejaEssaye != null)

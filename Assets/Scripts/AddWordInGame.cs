@@ -23,41 +23,34 @@
         }
     }
 
-    // @when Uniquement dans l'inspector en cliquant sur le bouton "Add Word In Game".
+    // Uniquement dans l'inspector en cliquant sur le bouton "Add Word In Game".
     /* [UNITY_EDITOR]
-     * Parcours une chaîne de caractère comprenant des mots et la difficulté des mots, se présentant sous 
-     * la forme : motA 1 motB 1 motC 0          peut contenir autant de mot que nécessaire.
-     * Ajoute ces mots avec leur difficulté dans la liste des mots du jeu, script AllWordInGame*/
+     * Lance un appel à l'API via CallAPIAddWordInGame(), retournant une liste de mot à ajouter dans le jeu.
+     * Execute la méthode AddWordInList() en lui envoyant cette liste.
+     * Ajoute les mots ainsi récupéré de l'API dans les listes prévues de la classe AllWordInGame.*/
     [ExecuteInEditMode]
     public class AddWordInGame : MonoBehaviour
     {
-        public AllWordInGame allWordInGame;
-
-        [Tooltip("Nécessite un mot suivi de sa difficulté : motA 1 motB 2 motC 0 : etc...")]
-        public string allWordToAdd;
+        [SerializeField]
+        private APIManager aPIManager;
+        [SerializeField]
+        private AllWordInGame allWordInGame;
 
         public void OnButtonClick()
         {
-            allWordToAdd.ToLower();
+            AddWordInList(aPIManager.CallAPIAddWordInGame());
+        }
 
-            string regexNumberOnly = "^[0-9]$";
-            string previousWord = "";
-
-            foreach (string word in allWordToAdd.Split(' '))
+        public void AddWordInList(List<Word> listWord)
+        {
+            foreach (Word item in listWord)
             {
-                if (Regex.IsMatch(word, regexNumberOnly))
-                {
-                    Word newWord = new Word(previousWord.Substring(0, 1).ToUpper() + previousWord.Substring(1), int.Parse(word));
-
-                    if (word == "0")
-                        allWordInGame.listWordEasy.Add(newWord);
-                    else if (word == "1")
-                        allWordInGame.listWordMedium.Add(newWord);
-                    else
-                        allWordInGame.listWordHard.Add(newWord);
-                }
-
-                previousWord = word;
+                if (item.indexDifficulty == 0 && !allWordInGame.listWordEasy.Contains(item))
+                    allWordInGame.listWordEasy.Add(item);
+                else if (item.indexDifficulty == 1 && !allWordInGame.listWordMedium.Contains(item))
+                    allWordInGame.listWordMedium.Add(item);
+                else if (!allWordInGame.listWordHard.Contains(item))
+                    allWordInGame.listWordHard.Add(item);
             }
         }
     }

@@ -17,6 +17,8 @@ public class UIMainMenu : MonoBehaviour
     // En cliquant sur le bouton pour fermer le menu principal.
     public void OnClickCloseMainMenu()
     {
+        Settings.instance.SaveSettings();
+
         panelMainMenu.SetActive(false);
         panelGame.SetActive(true);
     }
@@ -24,6 +26,8 @@ public class UIMainMenu : MonoBehaviour
     // En cliquant sur le bouton pour relancer une nouvelle partie.
     public void OnClickRestartGame()
     {
+        Settings.instance.SaveSettings();
+
         panelMainMenu.SetActive(false);
         PenduGameManager.instance.RestartGame();
     }
@@ -31,10 +35,12 @@ public class UIMainMenu : MonoBehaviour
     // En cliquant sur le bouton pour fermer le jeu.
     public void OnClickExitGame()
     {
+        Settings.instance.SaveSettings();
+
         Application.Quit();
 
-        #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+    #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
         #endif
     }
 }

@@ -9,23 +9,14 @@ public class UIDifficulty : MonoBehaviour
     private int indexDifficulty;
 
     // Renvoi la difficulté selectionné.
-    public int GetIndexDifficulty()
-    {
-        return indexDifficulty;
-    }
+    public int GetIndexDifficulty() { return indexDifficulty; }
     
     // Au démarrage d'une nouvelle partie.
-    /* @desc Affiche le menu demandant au joueur de selectionner la difficulté de la prochaine partie. */
+    /* @desc Affiche le menu demandant au joueur de selectionner 
+     * la difficulté de la prochaine partie. */
     public void ShowDifficultySelection()
     {
         uIPanelSelectDifficulty.SetActive(true);
-    }
-
-    // En selectionnant la difficulté.
-    /* Ferme le menu difficulté. */
-    public void CloseDifficultySelection()
-    {
-        uIPanelSelectDifficulty.SetActive(false);
     }
 
     // Trois boutons appelent cette méthode.
@@ -34,7 +25,13 @@ public class UIDifficulty : MonoBehaviour
     {
         indexDifficulty = value;
         CloseDifficultySelection();
+        StartCoroutine(PenduGameManager.instance.StartNewGame());
+    }
 
-        PenduGameManager.instance.StartNewGame(value);
+    // En selectionnant la difficulté.
+    /* Ferme le menu difficulté. */
+    public void CloseDifficultySelection()
+    {
+        uIPanelSelectDifficulty.SetActive(false);
     }
 }
